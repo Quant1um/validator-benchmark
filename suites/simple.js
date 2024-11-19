@@ -412,56 +412,5 @@ const obj = {
     });
 }());
 
-// ---- superstruct ----
-(function () {
-    const { is, object, string, number, pattern, size, min } = require('superstruct')
-
-    const schema = object({
-        name: size(string(), 4, 25),
-        email: pattern(string(), /^\S+@\S+\.\S+$/),
-        firstName: string(),
-        phone: string(),
-        age: min(number(), 18)
-    });
-
-    bench.add("superstruct", () => {
-        return is(obj, schema);
-    });
-}());
-
-// ---- picostruct ----
-(function () {
-    const { struct, filter, string, number } = require('picostruct')
-
-    const schema = struct({
-        name: filter(string(), x => x.length >= 4 && x.length <= 25),
-        email: string(/^\S+@\S+\.\S+$/),
-        firstName: string(),
-        phone: string(),
-        age: filter(number(), x => x >= 18)
-    });
-
-    bench.add("picostruct", () => {
-        return schema(obj);
-    });
-}());
-
-// ---- banditypes ----
-(function () {
-    const { object, string, number, fail } = require('banditypes')
-
-    const schema = object({
-        name: string().map(x => (x.length >= 4 && x.length <= 25) ? x : fail()),
-        email: string().map(x => /^\S+@\S+\.\S+$/.test(x) ? x : fail()),
-        firstName: string(),
-        phone: string(),
-        age: number().map(x => x >= 18 ? x : fail())
-    });
-
-    bench.add("banditypes", () => {
-        return schema(obj);
-    });
-}());
-
 
 bench.run();
